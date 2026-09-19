@@ -36,7 +36,9 @@ The tool writes into the game's memory, so **do not play online with it** and ba
 your save first. How it works inside: [docs/internals.md](docs/internals.md).
 
 ## Credits
-Igromanru for the appearance offsets and the Alter Appearance script in his Cheat Table.
+[The Grand Archives](https://github.com/The-Grand-Archives/Dark-Souls-III-CT-TGA) for the
+Dark Souls III cheat table their team maintains — the appearance offsets and the Alter
+Appearance script come from it.
 BobDoleOwndU for DSAppearancePresetTool, the tool this one mirrors.
 
 MIT licensed, see `LICENSE`.

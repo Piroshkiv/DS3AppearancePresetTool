@@ -31,7 +31,9 @@ commits the result on confirmation. So an import goes:
 4. the player then confirms the change in the menu.
 
 The menu is opened the way the **"Alter Appearance"** script in
-`DS3_TGA_v3.4.0.CT` does it (Rosaria group, by Igromanru): an AOB scan finds the
+`DS3_TGA_v3.4.0.CT` does it — the Rosaria group of the cheat table maintained by
+[The Grand Archives](https://github.com/The-Grand-Archives/Dark-Souls-III-CT-TGA);
+the script carries no author line of its own. An AOB scan finds the
 call site, its `rel32` gives the address of the menu function, and the call is
 made on a thread of our own inside the game (`VirtualAllocEx` +
 `CreateRemoteThread`). The call site is told apart by the menu id at the end of
