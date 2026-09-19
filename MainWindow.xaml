@@ -1,0 +1,43 @@
+﻿<Window x:Class="DS3AppearanceTool.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DS3 Appearance Preset Tool"
+        Height="218" Width="470" MinHeight="205" MinWidth="420"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BackBrush}"
+        UseLayoutRounding="True"
+        TextOptions.TextFormattingMode="Display">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,14">
+            <Ellipse x:Name="StatusDot" Width="9" Height="9" Margin="0,0,8,0"
+                     Fill="{StaticResource BadBrush}" VerticalAlignment="Center"/>
+            <TextBlock x:Name="StatusText" Text="Looking for Dark Souls III…"
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <UniformGrid Grid.Row="1" Columns="2" Margin="0,0,0,14">
+            <Button x:Name="ExportButton" Content="Export Appearance Data"
+                    Margin="0,0,6,0" Click="ExportButton_Click"/>
+            <Button x:Name="ImportButton" Content="Import Appearance Data"
+                    Margin="6,0,0,0" Click="ImportButton_Click"/>
+        </UniformGrid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+            <TextBlock Text="Gender" VerticalAlignment="Center" Margin="0,0,8,0"/>
+            <ComboBox x:Name="GenderBox" Width="220" Height="26" SelectedValuePath="Value"
+                      SelectionChanged="GenderBox_SelectionChanged"/>
+        </StackPanel>
+
+        <TextBlock x:Name="MessageText" Grid.Row="3" Margin="0,14,0,0"
+                   Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap"
+                   VerticalAlignment="Bottom"
+                   Text="Load a character in game, then export or import a .ds3chr preset."/>
+    </Grid>
+</Window>
