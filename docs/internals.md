@@ -65,3 +65,14 @@ None of the original DSAppearancePresetTool's code is here: this is a separate
 implementation for DS3, written from scratch. What was reused from the Cheat
 Engine table are offsets and structure layouts — facts about the game, not
 authored text.
+
+## Building
+
+```powershell
+dotnet publish DS3AppearanceTool.csproj -c Release -r win-x64 --self-contained false `
+  -p:PublishSingleFile=true -p:DebugType=none -o publish
+```
+
+That is the portable build the releases carry: one ~170 KB exe that needs the .NET 8
+Desktop Runtime. Add `--self-contained true` for an exe with the runtime inside
+(~68 MB, no prerequisites).

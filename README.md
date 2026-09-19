@@ -25,7 +25,12 @@ Pick a value in the *Gender* list and it goes into the game at once. Gender is w
 Rosaria charges for, so change it with the appearance menu open.
 
 ### Notes
-Needs .NET 8 (Windows Desktop). Run the tool as administrator if it cannot open the game.
+Portable: grab `DS3AppearanceTool.exe` from [Releases](../../releases) and run it, no
+install and nothing to unpack. It needs the
+[.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0), which most
+machines already have — Windows offers the download on launch if yours does not.
+
+Run the tool as administrator if it cannot open the game.
 
 The tool writes into the game's memory, so **do not play online with it** and back up
 your save first. How it works inside: [docs/internals.md](docs/internals.md).
