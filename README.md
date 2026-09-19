@@ -1,119 +1,134 @@
 # DS3 Appearance Preset Tool
 
-Аналог [DSAppearancePresetTool](https://github.com/BobDoleOwndU/DSAppearancePresetTool)
-(BobDoleOwndU, DS1/DSR) — но для **Dark Souls III**. WPF, только Windows.
+*[Русская версия](README.ru.md)*
 
-Работает с **памятью запущенной игры**, как оригинал: две кнопки — выгрузить
-внешность персонажа в файл и залить файл обратно. Сейвы не трогает: для `.sl2`
-есть веб-редактор (`../DSRSave/ds1-save-editor/`), и формат пресета у них общий.
+A Dark Souls III analogue of
+**[DSAppearancePresetTool](https://github.com/BobDoleOwndU/DSAppearancePresetTool)**
+by BobDoleOwndU, which does the same job for Dark Souls Remastered / PTDE.
+WPF, Windows only.
 
-## Чем отличается от оригинала
+Like the original, it works on the **memory of the running game**: two buttons,
+one to save the character's look into a file and one to load it back. Save files
+are not touched — for `.sl2` there is a web editor
+([DSRSave](https://github.com/Piroshkiv/DSRSave)), and the two share one preset
+format.
 
-| | DS1-тул | этот |
+![the window](docs/window.png)
+
+## How it differs from the original
+
+| | DS1 tool | this one |
 |---|---|---|
-| файл пресета | `.dsrchr`, 130 байт | `.ds3chr`, 216 байт — тот же, что экспортирует вкладка Appearance в редакторе DS3 |
-| пол | внутри пресета | **отдельный выпадающий список**, пишется в игру сразу по выбору |
-| применение | запись в память | перед импортом **сам открывает Alter Appearance** |
+| preset file | `.dsrchr`, 130 bytes | `.ds3chr`, 216 bytes — the same file the DS3 editor's Appearance tab exports |
+| gender | inside the preset | **a list of its own**, written into the game the moment it is picked |
+| applying | writes memory | opens **Alter Appearance** before importing |
 
-Всё окно — три контрола: экспорт, импорт, пол. Строка сверху говорит,
-подцепился ли тул к игре, строка снизу — что произошло последним.
+The whole window is three controls: export, import, gender. The line on top says
+whether the tool is attached to the game, the line at the bottom says what
+happened last.
 
-## Почему Alter Appearance
+## Why Alter Appearance
 
-Записать 208 байт в `PlayerGameData+0x6B8` мало: модель персонажа игра
-пересобирает не на каждый кадр, и правка «на ходу» доедет до экрана в лучшем
-случае после перезагрузки уровня. Меню смены внешности (услуга Розарии) —
-то самое место, где игра берёт эти байты, показывает их превью и фиксирует
-результат по подтверждению. Поэтому импорт по умолчанию идёт так:
+Writing 208 bytes to `PlayerGameData+0x6B8` is not enough on its own: the game
+does not rebuild the character model every frame, so an edit made mid-game
+reaches the screen after a level reload at best. The appearance menu (Rosaria's
+service) is the place where the game reads those bytes, previews them and
+commits the result on confirmation. So an import goes:
 
-1. открыть Alter Appearance;
-2. подождать 2500 мс, пока меню поднимется (`MenuDelayMs` в `MainWindow.xaml.cs`);
-3. записать face-блок и пол;
-4. дальше игрок подтверждает изменения в меню сам.
+1. open Alter Appearance;
+2. wait 2500 ms for the menu to come up (`MenuDelayMs` in `MainWindow.xaml.cs`);
+3. write the face block and the gender;
+4. the player then confirms the change in the menu.
 
-Меню открывается так же, как это делает скрипт **«Alter Appearance»** из
-`DS3_TGA_v3.4.0.CT` (группа Rosaria, автор — Igromanru): AOB-скан находит место
-вызова, из его `rel32` берётся адрес функции меню, а вызов делается своим
-потоком в процессе игры (`VirtualAllocEx` + `CreateRemoteThread`). Место вызова
-узнаётся по идентификатору меню в хвосте паттерна: `0x10` — смена внешности,
-`0x12` — трансмутация у Людлета, `0x13` — перераспределение статов. На
-установленной версии игры оба паттерна (этот и `GameDataMan`) находятся в
-`DarkSoulsIII.exe` ровно по одному разу.
+The menu is opened the way the **"Alter Appearance"** script in
+`DS3_TGA_v3.4.0.CT` does it (Rosaria group, by Igromanru): an AOB scan finds the
+call site, its `rel32` gives the address of the menu function, and the call is
+made on a thread of our own inside the game (`VirtualAllocEx` +
+`CreateRemoteThread`). The call site is told apart by the menu id at the end of
+the pattern: `0x10` is alter appearance, `0x12` Ludleth's transposition, `0x13`
+stat reallocation. On the installed version of the game both patterns (this one
+and `GameDataMan`) occur in `DarkSoulsIII.exe` exactly once.
 
-Список пола пишет в игру сразу по выбору. Пол — то, за что берёт плату Розария,
-так что менять его лучше с открытым меню смены внешности (например, сразу после
-импорта, пока меню ещё на экране).
+The gender list writes into the game as soon as a value is picked. Gender is what
+Rosaria charges for, so change it with the appearance menu open — for example
+right after an import, while the menu is still on screen.
 
-## Что пишется
+## What gets written
 
 ```
 PlayerGameData = [[GameDataMan] + 0x10]
 
-  +0x0AA   1 байт    пол    (0 — женский, 1 — мужской)
-  +0x0AB   1 байт    голос  (0..2) — только читается при экспорте, в игру не пишется
-  +0x6B8 208 байт    вся остальная внешность: ID причёски/бровей/бороды/
-                     зрачков/татуировки, девять цветов RGBA, ползунки формы
-                     лица, косметика и Build Detail (пропорции тела)
+  +0x0AA   1 byte     gender  (0 female, 1 male)
+  +0x0AB   1 byte     voice   (0..2) — read on export only, never written
+  +0x6B8 208 bytes    everything else: hair / brow / beard / pupil / tattoo
+                      model ids, nine RGBA colours, the face shape sliders,
+                      cosmetics and Build Detail (body proportions)
 ```
 
-208, а не 192 как в CT: хвост `0x778..0x787` — тоже внешность, и игра пишет его
-в сейв вместе с остальным. Float-пропорции `PGD+0x3B0` в пресет не входят: это
-runtime-развёртка байтов Build Detail, в сейв они не попадают.
+208 bytes, not the 192 the CT knows: the tail `0x778..0x787` is appearance data
+too, and the game writes it into the save along with the rest. The float
+proportions at `PGD+0x3B0` are not part of a preset — they are a runtime
+expansion of the Build Detail bytes and never reach a save.
 
-Разбор блока целиком — `../DSRSave/ds1-save-editor/docs/ds3-appearance.md`,
-исследовательский инструмент — `../DSRSave/tools/ds3-appearance-sweeper/`.
+The full breakdown of the block lives in
+[DSRSave](https://github.com/Piroshkiv/DSRSave) —
+`ds1-save-editor/docs/ds3-appearance.md`, and the research tool that found it is
+`tools/ds3-appearance-sweeper/` in the same repository.
 
-## Формат `.ds3chr`
+## The `.ds3chr` format
 
 ```
-0x00   4   магия "D3CH"
-0x04   1   версия = 1
-0x05   1   пол
-0x06   1   голос (в игру не пишется, но в файле лежит — формат общий с редактором)
-0x07   1   резерв, 0
-0x08 208   face-блок как есть
+0x00   4   magic "D3CH"
+0x04   1   version = 1
+0x05   1   gender
+0x06   1   voice (never written to the game, but kept in the file — the format
+           is shared with the editor)
+0x07   1   reserved, 0
+0x08 208   the face block, verbatim
 ```
 
-Байт-в-байт тот же файл, что делает `DS3Character.exportAppearancePreset()` в
-веб-редакторе. То есть: вытащил внешность из чужого сейва редактором — надел на
-своего живого персонажа этим тулом, и наоборот. Формат CT (`<facedata>`)
-сознательно не поддерживается — он режет блок до 192 байт и теряет десять полей.
+Byte for byte the same file `DS3Character.exportAppearancePreset()` produces in
+the web editor. So a look can be pulled out of any save with the editor and put
+on a live character with this tool, and the other way round. The CT's own
+`<facedata>` format is deliberately not supported — it cuts the block to 192
+bytes and loses ten fields.
 
-## Сборка и запуск
+## Building and running
 
 ```powershell
 dotnet build DS3AppearanceTool.csproj -c Release
 dotnet run  --project DS3AppearanceTool.csproj
 ```
 
-Нужен .NET 8 (Windows Desktop). Решение — `DSAppearancePresetTool.sln`.
+Needs .NET 8 (Windows Desktop). The solution is `DSAppearancePresetTool.sln`.
 
-Порядок работы: запустить игру, загрузить персонажа (в главном меню
-`PlayerGameData` ещё нулевой — тул покажет «no character loaded» и сам оживёт,
-когда персонаж загрузится), потом экспорт/импорт. Если OpenProcess не даётся —
-запустить тул от администратора.
+Order of work: start the game, load a character (at the main menu
+`PlayerGameData` is still null — the tool says "no character loaded" and comes
+alive on its own once a character is in), then export or import. If OpenProcess
+is refused, run the tool as administrator.
 
-## Предупреждение
+## Warning
 
-Тул пишет в память игры. **Играть с ним в онлайне не надо** — это то же самое,
-что играть с включённой Cheat Engine: отключай сеть (Offline Mode) и делай
-бэкап `%AppData%\Roaming\DarkSoulsIII\<steamid>\DS30000.sl2` перед тем, как
-что-то менять.
+This tool writes into the game's memory. **Do not play online with it** — it is
+the same as playing with Cheat Engine attached: go offline first, and back up
+`%AppData%\Roaming\DarkSoulsIII\<steamid>\DS30000.sl2` before changing anything.
 
-Отдельно про ID-поля: значения причёсок, бород, бровей, зрачков и татуировок —
-это индексы моделей, и несуществующий индекс роняет игру. Тул не даёт вводить их
-руками: он переносит ровно те значения, которые лежали в исходном пресете.
+About the id fields: hair, beard, brows, pupils and tattoos are model indices,
+and an index the game has no model for crashes it. The tool never lets you type
+one — it carries over exactly the values the source preset held.
 
-## Кредиты
+## Credits
 
-- офсеты внешности и скрипт Alter Appearance — `DS3_TGA_v3.4.0.CT`, Igromanru;
-- идея и формат «две кнопки» — DSAppearancePresetTool, BobDoleOwndU;
-- проверка офсетов на сейвах и разбор face-блока — `../DSRSave/tools/ds3-appearance-sweeper`.
+- appearance offsets and the Alter Appearance script — `DS3_TGA_v3.4.0.CT`, by
+  Igromanru;
+- the idea and the two-button shape — DSAppearancePresetTool, by BobDoleOwndU;
+- offsets checked against real saves and the face block decoded with
+  `tools/ds3-appearance-sweeper` in [DSRSave](https://github.com/Piroshkiv/DSRSave).
 
-Кода оригинального DSAppearancePresetTool здесь нет: это отдельная реализация под
-DS3, написанная с нуля. Из CT переиспользованы офсеты и раскладка структур —
-факты об игре, а не авторский текст.
+None of the original DSAppearancePresetTool's code is here: this is a separate
+implementation for DS3, written from scratch. What was reused from the CT are
+offsets and structure layouts — facts about the game, not authored text.
 
-## Лицензия
+## License
 
-MIT, см. `LICENSE`.
+MIT, see `LICENSE`.
