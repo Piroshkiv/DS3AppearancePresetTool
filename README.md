@@ -3,8 +3,6 @@ Tool for importing and exporting character appearance presets in Dark Souls III.
 A DS3 analogue of [DSAppearancePresetTool](https://github.com/BobDoleOwndU/DSAppearancePresetTool)
 by BobDoleOwndU, which does the same for Dark Souls Remastered/PTDE.
 
-*[Русская версия](README.ru.md)*
-
 ![the window](docs/window.png)
 
 ## Usage
